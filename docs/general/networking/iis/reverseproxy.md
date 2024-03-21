@@ -13,6 +13,12 @@ IIS with default selections plus Application Development->WebSocket Protocol
 
 ## Configure
 
+- These commands must be run from an elevated powershell prompt, this will perform the following tasks.
+    - Enable the proxy.
+    - Disable proxy caching.
+    - Preserve host header.
+    - Add the nessessary allowedServerVariables.
+
 ```powershell
 Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/proxy" -name "enabled" -value "True"
 Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/proxy/cache" -name "enabled" -value "False"
@@ -22,6 +28,12 @@ Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
 Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/rewrite/allowedServerVariables" -name "." -value @{name='HTTP_X_REAL_IP'}
 Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/rewrite/allowedServerVariables" -name "." -value @{name='HTTP_X_FORWARDED_HOST'}
 Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/rewrite/allowedServerVariables" -name "." -value @{name='HTTP_X_FORWARDED_PORT'}
+```
+
+long running streams may freeze due to limits within IIS, the following (powershell) command resolves it.
+
+```powershell
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.applicationHost/webLimits" -name "minBytesPerSecond" -value 25
 ```
 
 ## web.config
@@ -61,12 +73,11 @@ Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
                         <set name="HTTP_X_FORWARDED_PROTOCOL" value="http" />
                         <set name="HTTP_X_FORWARDED_PROTO" value="http" />
                     </serverVariables>
-                </rule>
-                <!-- proxy to Jellyfin -->
+                </rule><!-- proxy to Jellyfin -->
                 <rule name="Proxy">
                     <match url=".*" />
                     <conditions logicalGrouping="MatchAll" trackAllCaptures="false">
-                        <add input="/{R:0}" pattern=".well-known" negate="true" />
+                        <add input="{R:0}" pattern="^\.well-known" negate="true" />
                     </conditions>
                     <serverVariables>
                         <set name="HTTP_X_REAL_IP" value="{REMOTE_ADDR}" />
@@ -76,14 +87,12 @@ Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
                     <action type="Rewrite" url="http://localhost:8096/{R:0}" logRewrittenUrl="true" />
                 </rule>
             </rules>
-            <outboundRules>
-                <!-- Add Cache -->
+            <outboundRules><!-- Add Cache -->
                 <rule name="Add Cache" preCondition="images" enabled="true" patternSyntax="ECMAScript">
                     <match serverVariable="RESPONSE_Cache_Control" pattern="(.*)" />
                     <action type="Rewrite" value="public, max-age=604800" />
                 </rule>
-                <preConditions>
-                    <!-- Pre-Condition for images -->
+                <preConditions><!-- Pre-Condition for images -->
                     <preCondition name="images" logicalGrouping="MatchAny">
                         <add input="{REQUEST_URI}" pattern="Items/.+/Images/.*" />
                         <add input="{RESPONSE_CONTENT_TYPE}" pattern="^image/.+" />
