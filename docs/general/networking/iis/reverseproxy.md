@@ -108,7 +108,11 @@ Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
                 <add name="X-Content-Type-Options" value="nosniff" />
                 <add name="Cache-Control" value="no-cache" />
                 <add name="X-Frame-Options" value="SAMEORIGIN" />
-                <add name="X-Robots-Tag" value="noindex, nofollow" />
+                <add name="X-Robots-Tag" value="noindex, nofollow, noarchive" />
+                <!-- CORP, COES, COOP, this breaks trailers and some external plugins/images/assets -->
+                <!--<add name="Cross-Origin-Opener-Policy" value="same-origin" />-->
+                <!--<add name="Cross-Origin-Embedder-Policy" value="require-corp" />-->
+                <!--<add name="Cross-Origin-Resource-Policy" value="same-origin" />-->
             </customHeaders>
         </httpProtocol>
     </system.webServer>

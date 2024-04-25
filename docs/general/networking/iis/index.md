@@ -9,4 +9,4 @@ title: IIS
 
 There are two methods of configuration for IIS
 - [ARR configuration](reverseproxy) (easier)
-- [ANCM configuration](ancm) (faster, though technically unsupported by the JF team.)
+- [ANCM configuration](ancm) (faster, though unsupported by the JF team.)
