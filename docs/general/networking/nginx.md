@@ -67,9 +67,9 @@ server {
     add_header X-Content-Type-Options "nosniff";
 
     # COOP/COEP. Disable if you use external plugins/images/assets
-    add_header Cross-Origin-Opener-Policy "same-origin" always;
-    add_header Cross-Origin-Embedder-Policy "require-corp" always;
-    add_header Cross-Origin-Resource-Policy "same-origin" always;
+    #add_header Cross-Origin-Opener-Policy "same-origin" always;
+    #add_header Cross-Origin-Embedder-Policy "require-corp" always;
+    #add_header Cross-Origin-Resource-Policy "same-origin" always;
 
     # Permissions policy. May cause issues on some clients
     add_header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), battery=(), bluetooth=(), camera=(), clipboard-read=(), display-capture=(), document-domain=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), payment=(), publickey-credentials-get=(), serial=(), sync-xhr=(), usb=(), xr-spatial-tracking=()" always;
@@ -83,8 +83,7 @@ server {
     #add_header Content-Security-Policy "default-src https: data: blob: http://image.tmdb.org; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.youtube.com blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'";
 
     location = / {
-        return 302 http://$host/web/;
-        #return 302 https://$host/web/;
+        return 302 web/;
     }
 
     location / {
