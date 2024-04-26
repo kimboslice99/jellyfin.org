@@ -106,6 +106,10 @@ You may wish to utilize some security features, this configuration is a good sta
     Header set Referrer-Policy "no-referrer"
     Header set X-Robots-Tag "noindex, nofollow, noarchive"
     
+    # X-Frame-Options conditionally jellyfin/jellyfin-webos/issues/63
+    BrowserMatchNoCase !(webOS|playstation|Dalvik) xframe
+    Header set X-Frame-Options "SAMEORIGIN" ENV=xframe
+    
     # CORS
     Header set Cross-Origin-Resource-Policy "same-origin"
     BrowserMatchNoCase (webOS|JellyfinMediaPlayer|Dalvik) corp
