@@ -29,7 +29,7 @@ IIS with default selections, plus
 Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.applicationHost/webLimits" -name "minBytesPerSecond" -value 25
 ```
 
-## web.config - Basic config
+## web.config - Basic
 
 ```config
 <?xml version="1.0" encoding="utf-8"?>
@@ -66,7 +66,6 @@ Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
                 <clear />
                 <add name="X-XSS-Protection" value="0" />
                 <add name="X-Content-Type-Options" value="nosniff" />
-                <add name="Cache-Control" value="no-cache" />
                 <add name="X-Robots-Tag" value="noindex, nofollow, noarchive" />
             </customHeaders>
         </httpProtocol>
@@ -75,7 +74,7 @@ Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.
 </configuration>
 ```
 
-## web.config - Advanced config
+## web.config - Advanced
 You may wish to utilize some security features, this configuration is a good start. It may break some things so be prepared to debug.
 
 ```config
@@ -117,17 +116,13 @@ You may wish to utilize some security features, this configuration is a good sta
           <outboundRules><!-- Add Cache -->
                 <rule name="Add Cache" preCondition="static">
                     <match serverVariable="RESPONSE_Cache_Control" pattern="(.*)" />
-                    <action type="Rewrite" value="public, max-age=2592000, immutable, stale-if-error=86400" />
-                </rule>
-                <rule name="rem" preCondition="forgotpassword" enabled="true">
-                    <match filterByTags="None" serverVariable="" pattern="\&quot;PinFile\&quot;:\s*\&quot;[^\&quot;]+\&quot;" />
-                    <action type="Rewrite" value="&quot;PinFile&quot;:&quot;&quot;" />
-                </rule>
+                    <action type="Rewrite" value="public, max-age=2592000" />
+                </rule>=
                 <rule name="csp" enabled="true" preCondition="securable">
                     <match serverVariable="RESPONSE_Content_Security_Policy" pattern=".*" />
                     <action type="Rewrite" value="default-src 'none'; img-src 'self' https://i.ytimg.com https://image.tmdb.org https://m.media-amazon.com data:; script-src 'self' blob: https://www.youtube.com https://www.gstatic.com; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; manifest-src 'self' ; font-src 'self'; connect-src 'self'; frame-src 'self' https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'" />
                 </rule>
-                <rule name="permissionspolicy" preCondition="securable" enabled="true">
+                <rule name="permissionspolicy" enabled="true">
                     <match serverVariable="RESPONSE_Permissions_Policy" pattern=".*" />
                     <action type="Rewrite" value="geolocation=(), accelerometer=(), battery=(), ambient-light-sensor=(), clipboard-read=(), clipboard-write=(), display-capture=(), xr-spatial-tracking=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), sync-xhr=(), microphone=(), payment=(), publickey-credentials-get=(), document-domain=(), bluetooth=(), camera=(), gamepad=(self), usb=(self), encrypted-media=(self), autoplay=(self &quot;https://www.youtube.com&quot;), fullscreen=(self), cast=(self), picture-in-picture=(self &quot;https://www.youtube.com&quot;)" />
                 </rule>
@@ -156,31 +151,28 @@ You may wish to utilize some security features, this configuration is a good sta
                     <add input="{RESPONSE_CONTENT_TYPE}" pattern="^image/" />
                     <add input="{RESPONSE_CONTENT_TYPE}" pattern="^application/javascript" />
                 </preCondition>
-                <preCondition name="forgotpassword">
-                    <add input="{REQUEST_URI}" pattern="Users/ForgotPassword" />
-                </preCondition>
                 <preCondition name="securable"><!-- precondition to remove csp from some clients which I have had issues with -->
-                    <add input="{HTTP_USER_AGENT}" pattern="playstation|webOS|$^" negate="true" />
+                    <add input="{HTTP_USER_AGENT}" pattern="playstation" negate="true" />
                     <add input="{RESPONSE_CONTENT_TYPE}" pattern="^text/html" />
-                    <add input="{RESPONSE_STATUS}" pattern="^200" />
+                    <add input="{RESPONSE_STATUS}" pattern="^20" />
                 </preCondition>
                 <preCondition name="excludeua"><!--pre condition for excluding certain clients from X-Frame-Options jellyfin/jellyfin-webos/issues/63 -->
                     <add input="{HTTP_USER_AGENT}" pattern="webOS|playstation|Dalvik" negate="true" />
-                    <add input="{RESPONSE_STATUS}" pattern="^200" />
+                    <add input="{RESPONSE_STATUS}" pattern="^20" />
                 </preCondition>
                 <preCondition name="webos">
                     <add input="{HTTP_USER_AGENT}" pattern="webOS|JellyfinMediaPlayer|Dalvik" />
-                    <add input="{RESPONSE_STATUS}" pattern="^200" />
+                    <add input="{RESPONSE_STATUS}" pattern="^20" />
                 </preCondition>
                 <preCondition name="successcode">
-                    <add input="{RESPONSE_STATUS}" pattern="^200" />
+                    <add input="{RESPONSE_STATUS}" pattern="^20" />
                 </preCondition>
             </preConditions>
           </outboundRules>
         </rewrite>
         <httpProtocol>
             <customHeaders>
-                <remove name="X-Powered-By" />
+                <clear />
                 <add name="X-XSS-Protection" value="0" />
                 <add name="X-Content-Type-Options" value="nosniff" />
                 <add name="Referrer-Policy" value="no-referrer" />
